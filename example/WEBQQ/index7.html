@@ -1,0 +1,395 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="author" content="智能社 - zhinengshe.com" />
+<meta name="copyright" content="智能社 - zhinengshe.com" />
+<meta name="description" content="智能社是一家专注于web前端开发技术的公司，目前主要提供JavaScript培训和HTML5培训两项服务，同时还推出了大量javascript基础知识教程，智能课堂为你带来全新的学习方法和快乐的学习体验。" />
+<title></title>
+<style>
+*{margin:0; padding:0; list-style:none; text-decoration:none;}
+html,body{height:100%;}
+.box{height:100%;}
+.log_page{display:block; background:#f1f1f1;  height:100%;}
+.log_page .check_form{width:400px; height:300px; background:#ccc; position:absolute; top:50%; left:50%; margin-top:-150px; margin-left:-200px; border:2px solid #333; border-radius:15px;}
+.check_form .face_box{width:90px; height:90px; position:absolute; left:50%; margin-left:-45px; top:-45px;}
+.check_form .face_box img{position:absolute; top:0; left:0;}
+.check_form .face_box a{position:absolute; width:20px; height:30px; text-align:center; line-height:30px; top:50%; margin-top:-15px; background:rgba(0,0,0,0.6); color:#fff; display:none;}
+.prev_face{left:0;}
+.next_face{right:0;}
+.inp_box{position:absolute; top:100px; left:100px;}
+.inp_box p{height:35px; line-height:35px;}
+.chat_page{display:none; width:800px; height:500px; background:#f1f1f1; position:absolute; top:50%; left:50%; margin-top:-250px; margin-left:-400px; border:1px solid #333; border-radius:15px;}
+.info_box{ width:100%; height:45px; border-bottom:1px solid #000; position:absolute; top:0; left:0; z-index:2; background:#fff;}
+.info_box a{position:absolute; right:10px; top:6px; color:#000; font-family:微软雅黑; font-size:30px;}
+.info_box img{position:absolute; bottom:0; left:60px;}
+.info_box strong{position:absolute;  bottom:10px; left:170px;}
+.content_box{height:455px;  position:absolute; top:45px; left:0;}
+.content_box .con_l{float:left; width:598px; height:100%; border-right:2px solid #000; position:relative; top:0; left:0;}
+
+.con_l .msg_box{width:100%; height:300px; border-bottom:1px solid #000; position:relative; top:0; left:0;}
+
+.msg_l{width:588px; height:100%; position:absolute;top:0; left:0; overflow:hidden;}
+.msg_l ul{ position:absolute; top:0; left:0;}
+.msg_bar_box{ width:10px; height:100%; position:absolute;top:0; right:0; background:#999; overflow:hidden;}
+.msg_bar{width:10px; height:30px; background:#000; position:absolute; top:0; left:0;}
+
+
+.send_box{width:598px; height:114px;}
+.send_box textarea{height:100%; width:100%;}
+
+
+.content_box .con_r{float:right; width:200px; height:100%; position:relative; top:0; left:0;}
+.con_r .user_l{width:190px; height:100%; position:absolute; left:0; top:0; overflow:hidden;}
+.user_l ul{position:absolute; top:0; left:0;}
+.user_l ul li{height:30px; line-height:30px;}
+.user_l ul li img{width:30px; height:30px; vertical-align:middle;}
+.con_r .user_bar_box{ width:10px; height:100%; position:absolute; right:0; top:0;  background:#999; overflow:hidden;}
+.user_bar_box .user_bar{width:10px; height:30px; position:absolute; top:0; left:0; background:#000;}
+
+</style>
+<script src="jsonp.js"></script>
+<script src="wheel.js"></script>
+<script>
+function toDou(iNum){
+	return iNum<10?'0'+iNum:''+iNum;
+}
+function getDateTime(time){
+	var oDate = new Date(time*1000);
+	return oDate.getFullYear()+'-'+toDou(oDate.getMonth()+1)+'-'+toDou(oDate.getDate())+' '+toDou(oDate.getHours())+':'+toDou(oDate.getMinutes())+':'+toDou(oDate.getSeconds());
+}
+window.onload=function(){
+	var oLogPage = document.getElementById('log_page');
+	var oChatPage = document.getElementById('chat_page');
+	var oFaceBox = document.getElementById('faceBox');
+	var oPrev = oFaceBox.getElementsByTagName('a')[0];
+	var oNext = oFaceBox.getElementsByTagName('a')[1];
+	var oUser = document.getElementById('user');
+	var oPass = document.getElementById('pass');
+	var oAdd = document.getElementById('add_btn');
+	var oLog = document.getElementById('login_btn');
+	var oFaceShow = document.getElementById('face_show');
+	var oUserBox = document.getElementById('user_box');
+	var oUserList =document.getElementById('user_list');
+	var oUserBarBox = document.getElementById('user_bar_box');
+	var oUserBar = document.getElementById('user_bar');
+	
+	var oMsgBox = document.getElementById('msg_box');
+	var oMsgList =document.getElementById('msg_list');
+	var oMsgBarBox = document.getElementById('msg_bar_box');
+	var oMsgBar = document.getElementById('msg_bar');
+	
+	var oTxt = document.getElementById('txt');
+	var oSendBtn = document.getElementById('send_btn');
+	
+	var oExit = document.getElementById('exit');
+	var token = null;
+	var maxID = null;
+	var timer = null;
+	var faceID = 0;
+	var URL = 'http://zhinengshe.com/exercise/im/api.php';
+	oFaceBox.onmouseover=function(){
+		oPrev.style.display='block';
+		oNext.style.display='block';
+	};
+	oFaceBox.onmouseout=function(){
+		oPrev.style.display='none';
+		oNext.style.display='none';
+	};
+	oPrev.onclick=function(){
+		var oImg = oFaceBox.children[0];
+		oImg.alt = parseInt(oImg.alt)-1;
+		if(oImg.alt<1){
+			oImg.alt = 9;
+		}
+		oImg.src = 'img/'+oImg.alt+'.jpg';
+		faceID = oImg.alt-1;
+	};
+	oNext.onclick=function(){
+		var oImg = oFaceBox.children[0];
+		oImg.alt = parseInt(oImg.alt)+1;
+		if(oImg.alt>9){
+			oImg.alt = 1;
+		}
+		oImg.src = 'img/'+oImg.alt+'.jpg';
+		faceID = oImg.alt-1;
+	};
+	
+	oAdd.onclick=function(){
+		jsonp({
+			url:URL,
+			data:{
+				a:'reg',
+				user:oUser.value,
+				pass:oPass.value,
+				face:faceID
+			},
+			success:function(json){
+				if(!json.err){
+					alert('注册成功：'+json.msg);
+				}else{
+					alert('注册失败：'+json.msg);
+				}
+			}
+		});
+	};
+	
+	oLog.onclick=function(){
+		jsonp({
+			url:URL,
+			data:{
+				a:'lgn',
+				user:oUser.value,
+				pass:oPass.value,
+			},
+			success:function(json){
+				if(!json.err){
+					alert(json.msg);
+					oLogPage.style.display='none';
+					oChatPage.style.display='block';
+					oFaceShow.src='img/'+(parseInt(json.face)+1)+'.jpg';
+					token = json.token;
+					getUser();
+					getMsg();
+					getUpdateMsg();
+				}else{
+					alert('登录失败:'+json.msg);
+				}
+			}
+		});
+	};
+	
+	function getMsg(){
+		jsonp({
+			url:URL,
+			data:{
+				a:'get_msg',
+				token:token
+			},
+			success:function(json){
+				if(!json.err){
+					var arr = json.data;
+					for(var i=0;i<arr.length;i++){
+						maxID = arr[i].ID;
+						var oLi = createLi(arr[i].ID,arr[i].username,arr[i].post_time,arr[i].content);
+						oMsgList.appendChild(oLi);
+					}
+					
+					oMsgList.style.top = -(oMsgList.scrollHeight-oMsgBox.offsetHeight)+'px';
+					oMsgBar.style.top = oMsgBarBox.offsetHeight-oMsgBar.offsetHeight+'px';
+					
+					myScroll(oMsgBox,oMsgList,oMsgBarBox,oMsgBar);
+				}
+			}
+		});
+	}
+	
+	function createLi(id,username,time,content){
+		var oLi = document.createElement('li');
+		oLi.innerHTML='<p><strong>'+username+'</strong><span>'+getDateTime(time)+'</span></p><p>'+content+'</p>';
+		return oLi;
+	}
+	
+	function getUser(){
+		jsonp({
+			url:URL,
+			data:{
+				a:'get_user_list',
+				token:token
+			},
+			success:function(json){
+				if(!json.err){
+					var arr = json.data;
+					for(var i=0;i<arr.length;i++){
+						var oLi = document.createElement('li');
+						oLi.innerHTML='<img src="img/'+(parseInt(arr[i].face)+1)+'.jpg" /><span>'+arr[i].username+'</span>';
+						oUserList.appendChild(oLi);
+					}
+					myScroll(oUserBox,oUserList,oUserBarBox,oUserBar);
+				}
+			}
+		});
+	}
+	
+	function myScroll(oBox,oList,oBarBox,oBar){
+		oBar.onmousedown=function(ev){
+			var oEvent = ev||event;
+			var disY = oEvent.clientY-oBar.offsetTop;
+			document.onmousemove=function(ev){
+				var oEvent = ev||event;
+				var t = oEvent.clientY-disY;
+				fnScroll(t);
+			};
+			document.onmouseup=function(){
+				document.onmousemove=null;
+				document.onmouseup=null;
+				oBar.releaseCapture&&oBar.releaseCapture();
+			};
+			oBar.setCapture&&oBar.setCapture();
+			return false;
+		};
+		function fnScroll(t){
+			if(t<=0){
+				t = 0;
+			}else if(t>(oBarBox.offsetHeight-oBar.offsetHeight)){
+				t = oBarBox.offsetHeight-oBar.offsetHeight;
+			}
+			oBar.style.top = t+'px';
+			
+			var scale = t/(oBarBox.offsetHeight-oBar.offsetHeight);
+			oList.style.top = -scale*(oList.scrollHeight-oBox.offsetHeight)+'px';
+		}
+		addWheel(oBox,function(bDir){
+			var t = oBar.offsetTop;
+			if(bDir){
+				t+=10;
+			}else{
+				t-=10;
+			}
+			fnScroll(t);
+		});
+	}
+	
+	oSendBtn.onclick=function(){
+		jsonp({
+			url:URL,
+			data:{
+				a:'snd_msg',
+				content:oTxt.value,
+				token:token
+			},
+			success:function(json){
+				if(!json.err){
+					maxID = json.ID;
+					var oLi = createLi(json.ID,oUser.value,json.time,oTxt.value);
+					oMsgList.appendChild(oLi);
+					oMsgList.style.top = -(oMsgList.scrollHeight-oMsgBox.offsetHeight)+'px';
+					oTxt.value = '';
+				}
+			}
+		});
+	};
+	function getUpdateMsg(){
+		timer = setInterval(function(){
+			jsonp({
+				url:URL,
+				data:{
+					a:'get_msg_n',
+					n:maxID,
+					token:token
+				},
+				success:function(json){
+					if(!json.err){
+						var arr = json.data;
+						for(var i=0;i<arr.length;i++){
+							maxID = arr[i].ID;
+							var oLi = createLi(arr[i].ID,arr[i].username,arr[i].post_time,arr[i].content);
+							oMsgList.appendChild(oLi);
+						}
+						
+						oMsgList.style.top = -(oMsgList.scrollHeight-oMsgBox.offsetHeight)+'px';
+						oMsgBar.style.top = oMsgBarBox.offsetHeight-oMsgBar.offsetHeight+'px';
+					}
+				}
+			});
+		},1000);
+	}
+	
+	oExit.onclick=function(){
+		jsonp({
+			url:URL,
+			data:{
+				a:'logout',
+				token:token
+			},
+			success:function(json){
+				if(!json.err){
+					alert('退出成功:'+json.msg);
+					oChatPage.style.display='none';
+					oUser.value = '';
+					oPass.value='';
+					oLogPage.style.display='block';
+					oMsgList.innerHTML='';
+					oUserList.innerHTML='';
+					token = null;
+					maxID = null;
+					clearInterval(timer);
+				}
+			}
+		});
+	};
+	
+};
+</script>
+</head>
+
+<body>
+<div class="box">
+	<div class="log_page" id="log_page">
+		<div class="check_form">
+			<div class="face_box" id="faceBox">
+				<img src="img/1.jpg" alt="1" />
+				<a href="javascript:;" class="prev_face">&lt;</a>
+				<a href="javascript:;" class="next_face">&gt;</a>
+			</div>
+			<div class="inp_box">
+				<p><label for="user">用户名:</label><input type="text" id="user" /></p>
+				<p><label for="pass">密&nbsp;码:</label><input type="password" id="pass" /></p>
+				<p>
+					<input type="button" value="注册" id="add_btn" />
+					<input type="button" value="登录" id="login_btn" />
+				</p>
+			</div>
+		</div>
+	</div>
+	<div class="chat_page" id="chat_page">
+		<div class="info_box">
+			<img src="img/1.jpg" id="face_show" />
+			<strong>javascript聊天室</strong>
+			<a href="javascript:;" id="exit" >X</a>
+		</div>
+		<div class="content_box">
+			<div class="con_l">
+				<div class="msg_box">
+					<div class="msg_l" id="msg_box">
+						<ul id="msg_list"></ul>
+					</div>
+					<div class="msg_bar_box" id="msg_bar_box">
+						<div class="msg_bar" id="msg_bar"></div>
+					</div>
+				</div>
+				<div class="send_box">
+					<textarea id="txt"></textarea>
+					<input type="button" value="send" id="send_btn"/>
+				</div>
+			</div>
+			<div class="con_r">
+				<div class="user_l" id="user_box">
+					<ul id="user_list"></ul>
+				</div>
+				<div class="user_bar_box" id="user_bar_box">
+					<div class="user_bar" id="user_bar"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

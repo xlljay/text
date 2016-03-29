@@ -1,0 +1,21 @@
+/* 注：
+ * 颜色规范：
+ * red: #
+ * blue: #0181ec;
+ * yellow: #
+ * gray: #
+ */
+/*基本布局*/
+body{ color:#555; line-height:22px; background-color:#f4f4f1;}
+a{ color: #555;}
+.font-yen{font-family:'Microsoft YaHei',STXihei,MingLiu;}
+/*html,body{height:100%; width:100%; overflow:hidden;}*/
+/* CLEARFIX */
+.clearfix:after { content: "."; display: block; height: 0; clear: both; visibility: hidden;}
+* html .clearfix { height: 1%;}
+.clearfix { display: block;}
+input[type="text"],input[type="number"],input[type="password"],input[type="button"],input[type="submit"],textarea,button{outline: 0; -webkit-appearance:none; -moz-appearance:none; -webkit-tap-highlight-color:transparent;-webkit-transition:background-color;}
+.m-illustrate{ font-size: 20px; text-align: center; padding: 90px 0 0 0;}
+.m-illustrate a{ display: inline-block; padding: 15px 0 0 0; /*color:#f24333;*/-webkit-transition: color 0.3s, border-color 0.3s;
+  transition: color 0.8s, border-color .8s;}
+.m-illustrate a:hover{ color: #136086;}
